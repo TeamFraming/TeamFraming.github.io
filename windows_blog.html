@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamFraming - Windows Style Blog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'MS Sans Serif', sans-serif;
+            font-size: 11px;
+            overflow: hidden;
+            height: 100vh;
+            background: linear-gradient(135deg, #0078d4 0%, #4cc2ff 50%, #0078d4 100%);
+            position: relative;
+        }
+
+        .desktop {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+        }
+
+        .desktop-icon {
+            position: absolute;
+            width: 64px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            padding: 4px;
+        }
+
+        .desktop-icon:hover {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+
+        .desktop-icon img {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 4px;
+        }
+
+        .desktop-icon span {
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            text-align: center;
+            font-size: 11px;
+            line-height: 1.2;
+        }
+
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(to bottom, #316AC5 0%, #1F4788 100%);
+            border-top: 1px solid #5B8BC7;
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            z-index: 9999;
+        }
+
+        .start-button {
+            height: 24px;
+            background: linear-gradient(to bottom, #7DB46C 0%, #3E7B2F 100%);
+            border: 1px outset #7DB46C;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+            padding: 0 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .start-button:active {
+            border: 1px inset #7DB46C;
+        }
+
+        .taskbar-time {
+            margin-left: auto;
+            color: white;
+            font-size: 11px;
+            padding: 0 8px;
+            border-left: 1px solid #1F4788;
+        }
+
+        .window {
+            position: absolute;
+            min-width: 300px;
+            min-height: 200px;
+            background: #C0C0C0;
+            border: 2px outset #C0C0C0;
+            display: none;
+            z-index: 100;
+        }
+
+        .window.active {
+            z-index: 200;
+        }
+
+        .window-header {
+            height: 18px;
+            background: linear-gradient(to bottom, #0078D4 0%, #1560BD 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            cursor: move;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .window-title {
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 2px;
+        }
+
+        .window-control {
+            width: 16px;
+            height: 14px;
+            background: #C0C0C0;
+            border: 1px outset #C0C0C0;
+            font-size: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .window-control:hover {
+            background: #E0E0E0;
+        }
+
+        .window-control:active {
+            border: 1px inset #C0C0C0;
+        }
+
+        .window-content {
+            padding: 8px;
+            height: calc(100% - 18px);
+            overflow: auto;
+            background: white;
+        }
+
+        .start-menu {
+            position: fixed;
+            bottom: 30px;
+            left: 4px;
+            width: 200px;
+            background: #C0C0C0;
+            border: 2px outset #C0C0C0;
+            display: none;
+            z-index: 10000;
+        }
+
+        .start-menu-item {
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .start-menu-item:hover {
+            background: #316AC5;
+            color: white;
+        }
+
+        .blog-post {
+            margin-bottom: 16px;
+            padding: 12px;
+            border: 1px inset #C0C0C0;
+            background: #F0F0F0;
+        }
+
+        .blog-post h3 {
+            color: #0078D4;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .blog-post .date {
+            color: #666;
+            font-size: 10px;
+            margin-bottom: 8px;
+        }
+
+        .blog-post p {
+            line-height: 1.4;
+            font-size: 11px;
+        }
+
+        .folder-view {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .folder-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 2px 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .folder-item:hover {
+            background: #316AC5;
+            color: white;
+        }
+
+        .folder-item:before {
+            content: "📁";
+            font-size: 16px;
+        }
+
+        .file-item:before {
+            content: "📄";
+            font-size: 16px;
+        }
+
+        @keyframes windowOpen {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .window.opening {
+            animation: windowOpen 0.2s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="desktop">
+        <!-- Desktop Icons -->
+        <div class="desktop-icon" style="top: 20px; left: 20px;" data-window="my-computer">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjNENBRjUwIi8+CjxyZWN0IHg9IjQiIHk9IjQiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0iIzQ1QTA0OSIvPgo8L3N2Zz4K" alt="내 컴퓨터">
+            <span>내 컴퓨터</span>
+        </div>
+
+        <div class="desktop-icon" style="top: 100px; left: 20px;" data-window="blog-folder">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjRkZEQjRDIi8+CjxyZWN0IHg9IjQiIHk9IjgiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyMCIgZmlsbD0iI0ZGQzEwNyIvPgo8L3N2Zz4K" alt="블로그">
+            <span>TeamFraming<br>Blog</span>
+        </div>
+
+        <div class="desktop-icon" style="top: 180px; left: 20px;" data-window="about">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMDA3OEQ0Ii8+CjxyZWN0IHg9IjQiIHk9IjQiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0iIzEwNjBCRCIvPgo8L3N2Zz4K" alt="소개">
+            <span>About Me</span>
+        </div>
+
+        <div class="desktop-icon" style="top: 20px; right: 20px;" data-window="trash">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjNkM3NTdEIi8+CjxyZWN0IHg9IjYiIHk9IjgiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0iIzUwNTk2MSIvPgo8L3N2Zz4K" alt="휴지통">
+            <span>휴지통</span>
+        </div>
+    </div>
+
+    <!-- Windows -->
+    <div class="window" id="my-computer" style="top: 50px; left: 100px; width: 500px; height: 350px;">
+        <div class="window-header">
+            <span class="window-title">내 컴퓨터</span>
+            <div class="window-controls">
+                <div class="window-control" onclick="minimizeWindow('my-computer')">_</div>
+                <div class="window-control" onclick="maximizeWindow('my-computer')">□</div>
+                <div class="window-control" onclick="closeWindow('my-computer')">×</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="folder-view">
+                <div class="folder-item" onclick="openWindow('blog-folder')">TeamFraming Blog</div>
+                <div class="folder-item">문서</div>
+                <div class="folder-item">사진</div>
+                <div class="folder-item">음악</div>
+                <div class="folder-item">비디오</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="window" id="blog-folder" style="top: 80px; left: 150px; width: 600px; height: 400px;">
+        <div class="window-header">
+            <span class="window-title">TeamFraming Blog - 블로그 포스트</span>
+            <div class="window-controls">
+                <div class="window-control" onclick="minimizeWindow('blog-folder')">_</div>
+                <div class="window-control" onclick="maximizeWindow('blog-folder')">□</div>
+                <div class="window-control" onclick="closeWindow('blog-folder')">×</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="blog-post">
+                <h3>TeamFraming 블로그에 오신 것을 환영합니다!</h3>
+                <div class="date">2025-05-23</div>
+                <p>안녕하세요! Windows 95 스타일의 독특한 블로그에 오신 것을 환영합니다. 이곳에서는 개발, 디자인, 그리고 팀워크에 관한 다양한 이야기를 나눌 예정입니다.</p>
+            </div>
+            
+            <div class="blog-post">
+                <h3>GitHub Pages로 정적 사이트 만들기</h3>
+                <div class="date">2025-05-22</div>
+                <p>GitHub Pages는 정적 웹사이트를 무료로 호스팅할 수 있는 훌륭한 서비스입니다. Jekyll을 사용하거나 순수 HTML/CSS/JS로도 멋진 사이트를 만들 수 있어요.</p>
+            </div>
+            
+            <div class="blog-post">
+                <h3>레트로 UI 디자인의 매력</h3>
+                <div class="date">2025-05-21</div>
+                <p>90년대 GUI 디자인이 다시 주목받고 있습니다. 단순하면서도 직관적인 디자인 철학에서 배울 점이 많죠. 이 블로그도 그런 철학을 담아 만들어졌습니다.</p>
+            </div>
+            
+            <div class="blog-post">
+                <h3>팀 프레이밍의 중요성</h3>
+                <div class="date">2025-05-20</div>
+                <p>좋은 팀워크는 명확한 프레이밍에서 시작됩니다. 목표를 설정하고, 역할을 정의하며, 소통 방식을 정하는 것이 성공적인 프로젝트의 핵심입니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="window" id="about" style="top: 100px; left: 200px; width: 400px; height: 300px;">
+        <div class="window-header">
+            <span class="window-title">About TeamFraming</span>
+            <div class="window-controls">
+                <div class="window-control" onclick="minimizeWindow('about')">_</div>
+                <div class="window-control" onclick="maximizeWindow('about')">□</div>
+                <div class="window-control" onclick="closeWindow('about')">×</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <h3 style="color: #0078D4; margin-bottom: 12px;">TeamFraming이란?</h3>
+            <p style="line-height: 1.5; margin-bottom: 12px;">
+                TeamFraming은 효과적인 팀워크와 프로젝트 관리에 대한 인사이트를 공유하는 블로그입니다.
+            </p>
+            <p style="line-height: 1.5; margin-bottom: 12px;">
+                우리는 다음과 같은 주제들을 다룹니다:
+            </p>
+            <ul style="margin-left: 20px; line-height: 1.5;">
+                <li>프로젝트 매니지먼트</li>
+                <li>팀 커뮤니케이션</li>
+                <li>개발 방법론</li>
+                <li>디자인 트렌드</li>
+                <li>기술 리뷰</li>
+            </ul>
+            <p style="line-height: 1.5; margin-top: 12px;">
+                <strong>연락처:</strong> teamframing@example.com
+            </p>
+        </div>
+    </div>
+
+    <div class="window" id="trash" style="top: 120px; left: 250px; width: 350px; height: 250px;">
+        <div class="window-header">
+            <span class="window-title">휴지통</span>
+            <div class="window-controls">
+                <div class="window-control" onclick="minimizeWindow('trash')">_</div>
+                <div class="window-control" onclick="maximizeWindow('trash')">□</div>
+                <div class="window-control" onclick="closeWindow('trash')">×</div>
+            </div>
+        </div>
+        <div class="window-content">
+            <p style="text-align: center; margin-top: 80px; color: #666;">
+                휴지통이 비어있습니다.
+            </p>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <div class="start-button" onclick="toggleStartMenu()">
+            <span>🪟</span>
+            시작
+        </div>
+        <div class="taskbar-time" id="taskbar-time"></div>
+    </div>
+
+    <!-- Start Menu -->
+    <div class="start-menu" id="start-menu">
+        <div class="start-menu-item" onclick="openWindow('my-computer')">
+            <span>💻</span>내 컴퓨터
+        </div>
+        <div class="start-menu-item" onclick="openWindow('blog-folder')">
+            <span>📁</span>TeamFraming Blog
+        </div>
+        <div class="start-menu-item" onclick="openWindow('about')">
+            <span>ℹ️</span>About Me
+        </div>
+        <hr style="margin: 4px 0; border: 1px inset #C0C0C0;">
+        <div class="start-menu-item" onclick="alert('시스템 종료는 브라우저를 닫아주세요!')">
+            <span>🔌</span>시스템 종료
+        </div>
+    </div>
+
+    <script>
+        let activeWindow = null;
+        let dragData = { isDragging: false, startX: 0, startY: 0, windowElement: null };
+
+        // 시계 업데이트
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ko-KR', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+            document.getElementById('taskbar-time').textContent = timeString;
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 시작 메뉴 토글
+        function toggleStartMenu() {
+            const startMenu = document.getElementById('start-menu');
+            startMenu.style.display = startMenu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // 창 열기
+        function openWindow(windowId) {
+            const window = document.getElementById(windowId);
+            if (window) {
+                window.style.display = 'block';
+                window.classList.add('opening');
+                setActiveWindow(window);
+                setTimeout(() => window.classList.remove('opening'), 200);
+            }
+            toggleStartMenu(); // 시작 메뉴 닫기
+        }
+
+        // 창 닫기
+        function closeWindow(windowId) {
+            const window = document.getElementById(windowId);
+            if (window) {
+                window.style.display = 'none';
+            }
+        }
+
+        // 창 최소화
+        function minimizeWindow(windowId) {
+            const window = document.getElementById(windowId);
+            if (window) {
+                window.style.display = 'none';
+            }
+        }
+
+        // 창 최대화
+        function maximizeWindow(windowId) {
+            const window = document.getElementById(windowId);
+            if (window) {
+                if (window.style.width === '100vw') {
+                    // 원래 크기로 복원
+                    window.style.width = '500px';
+                    window.style.height = '350px';
+                    window.style.top = '50px';
+                    window.style.left = '100px';
+                } else {
+                    // 최대화
+                    window.style.width = '100vw';
+                    window.style.height = 'calc(100vh - 30px)';
+                    window.style.top = '0';
+                    window.style.left = '0';
+                }
+            }
+        }
+
+        // 활성 창 설정
+        function setActiveWindow(window) {
+            // 모든 창에서 active 클래스 제거
+            document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+            // 현재 창에 active 클래스 추가
+            window.classList.add('active');
+            activeWindow = window;
+        }
+
+        // 데스크탑 아이콘 더블클릭 이벤트
+        document.querySelectorAll('.desktop-icon').forEach(icon => {
+            let clickCount = 0;
+            icon.addEventListener('click', function() {
+                clickCount++;
+                setTimeout(() => {
+                    if (clickCount === 1) {
+                        // 단일 클릭
+                    } else if (clickCount === 2) {
+                        // 더블 클릭
+                        const windowId = this.getAttribute('data-window');
+                        if (windowId) {
+                            openWindow(windowId);
+                        }
+                    }
+                    clickCount = 0;
+                }, 300);
+            });
+        });
+
+        // 창 드래그 기능
+        document.addEventListener('mousedown', function(e) {
+            const header = e.target.closest('.window-header');
+            if (header && !e.target.classList.contains('window-control')) {
+                const window = header.closest('.window');
+                setActiveWindow(window);
+                
+                dragData.isDragging = true;
+                dragData.windowElement = window;
+                dragData.startX = e.clientX - window.offsetLeft;
+                dragData.startY = e.clientY - window.offsetTop;
+                
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (dragData.isDragging && dragData.windowElement) {
+                const newX = e.clientX - dragData.startX;
+                const newY = e.clientY - dragData.startY;
+                
+                dragData.windowElement.style.left = Math.max(0, newX) + 'px';
+                dragData.windowElement.style.top = Math.max(0, newY) + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            dragData.isDragging = false;
+            dragData.windowElement = null;
+        });
+
+        // 창 클릭 시 활성화
+        document.addEventListener('mousedown', function(e) {
+            const window = e.target.closest('.window');
+            if (window) {
+                setActiveWindow(window);
+            }
+        });
+
+        // 시작 메뉴 외부 클릭 시 닫기
+        document.addEventListener('click', function(e) {
+            const startMenu = document.getElementById('start-menu');
+            const startButton = document.querySelector('.start-button');
+            
+            if (!startMenu.contains(e.target) && !startButton.contains(e.target)) {
+                startMenu.style.display = 'none';
+            }
+        });
+
+        // 키보드 단축키
+        document.addEventListener('keydown', function(e) {
+            // Alt + F4로 활성 창 닫기
+            if (e.altKey && e.key === 'F4' && activeWindow) {
+                e.preventDefault();
+                activeWindow.style.display = 'none';
+            }
+            
+            // Ctrl + Alt + Del
+            if (e.ctrlKey && e.altKey && e.key === 'Delete') {
+                e.preventDefault();
+                alert('작업 관리자는 이 데모에서 지원되지 않습니다.');
+            }
+        });
+
+        // 초기 환영 메시지
+        setTimeout(() => {
+            openWindow('blog-folder');
+        }, 1000);
+    </script>
+</body>
+</html>
